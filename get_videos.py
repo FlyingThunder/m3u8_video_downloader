@@ -5,6 +5,7 @@ import pyautogui
 import clipboard
 from dotenv import load_dotenv
 import os
+import datetime
 
 load_dotenv()
 username = os.getenv("cbtname")
@@ -68,11 +69,23 @@ def get_m3u8_video(url):
     pyautogui.press("enter")
     time.sleep(0.5)
 
-    with open("dump.txt", "a+") as dumpfile:
-        dumpfile.write(str({'video': title, 'url': clipboard.paste()}))
-        dumpfile.write("\n")
+    try:
+        while os.path.exists(f"res/{title}.mp4"):
+            title = title + "1"
+    except:
+        pass
 
-x = 130 #start video
+    command = f'ffmpeg -i "{clipboard.paste()}" -c copy -bsf:a aac_adtstoasc "res/{title}.mp4"'
+
+    os.system(command)
+    print(f"{title} runtergeladen")
+    #print("Returned Value: ", res)
+
+    with open("log.txt", "a") as logfile:
+        logfile.write(f"{datetime.datetime.now()} Videourl {title} gespeichert")
+        logfile.write("\n")
+
+x = 157 #start video
 while x < 461:
     get_m3u8_video(f"https://www.cbtnuggets.com/learn/it-training/playlist/nrn:playlist:user:5fcf88f463ebba00155acb18/{x}?autostart=1")
     x += 1
