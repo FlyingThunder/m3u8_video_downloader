@@ -6,6 +6,7 @@ import clipboard
 from dotenv import load_dotenv
 import os
 import datetime
+import re
 
 load_dotenv()
 username = os.getenv("cbtname")
@@ -46,7 +47,7 @@ def get_m3u8_video(url):
     print("Loading new video")
     driver.get(url)
 
-    time.sleep(5)
+    time.sleep(8)
     title = driver.find_element_by_xpath("/html/body/div/div[2]/main/div/div/section/section[1]/div[3]/div/div/span").text
     print(title)
     time.sleep(0.5)
@@ -69,13 +70,21 @@ def get_m3u8_video(url):
     pyautogui.press("enter")
     time.sleep(0.5)
 
+    chars = set('?!:')
+    if any((c in chars) for c in title):
+        title = re.sub('[?!:]', '', title)
+
     try:
         while os.path.exists(f"res/{title}.mp4"):
             title = title + "1"
     except:
         pass
 
-    command = f'ffmpeg -i "{clipboard.paste()}" -c copy -bsf:a aac_adtstoasc "res/{title}.mp4"'
+    print("starting download")
+    command = f'ffmpeg -i "{clipboard.paste()}" -c copy -bsf:a aac_adtstoasc "res/{title}.mp4" > dump.txt'
+
+    # import subprocess
+    # output = subprocess.run(command)
 
     os.system(command)
     print(f"{title} runtergeladen")
